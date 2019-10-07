@@ -37,7 +37,7 @@ read
 	
 compare
 	movff	POSTDEC0, W
-	subwf	POSTINC1, 0
+	subwf	POSTDEC1, 0
 	movwf	PORTE
 	decfsz	0x08, ACCESS
 	bra	compare
