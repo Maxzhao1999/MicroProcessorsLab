@@ -24,7 +24,7 @@ start
 	movlw	0xFF
 	movwf   PORTD, ACCESS	    ;set OE1 OE2 to high, CP1 CP2 to high
 	movwf	PORTE, ACCESS       ;ensure all port E high
-	movlw	0xFA
+	movlw	0xFE
 	movwf	0x01, ACCESS	
 	call	controlwrite1
 	call	controlread1
@@ -61,7 +61,9 @@ controlread1
 	movlw	0xFD
 	movwf	PORTD, ACCESS	    ;set OE1 to low
 	call	delay
-	movff	LATE, 0x02
+;	movff	PORTE, 0x02
+	movf	PORTE, W,ACCESS
+	movwf	 0x02,ACCESS
 	movlw	0xFF
 	movwf	PORTD, ACCESS
 	setf	TRISE
@@ -85,7 +87,7 @@ controlread2
 	movlw	0xF7
 	movwf	PORTD, ACCESS	    ;set OE2 to low
 	call	delay
-	movff	LATE, 0x04
+	movff	PORTE, 0x04
 	movlw	0xFF
 	movwf	PORTD, ACCESS
 	setf	TRISE
