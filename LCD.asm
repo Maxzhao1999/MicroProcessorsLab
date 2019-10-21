@@ -55,6 +55,12 @@ LCD_Loop_message
 	bra	LCD_Loop_message
 	return
 
+LCD_Clear
+	movlw	0x01
+	call	LCD_Send_Byte_I
+	movlw	.2
+	call	LCD_delay_ms
+		
 LCD_Send_Byte_I		    ; Transmits byte stored in W to instruction reg
 	movwf   LCD_tmp
 	swapf   LCD_tmp,W   ; swap nibbles, high nibble goes first
