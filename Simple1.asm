@@ -6,7 +6,7 @@
 acs0	udata_acs   ; reserve data space in access ram
 counter	    res 1   ; reserve one byte for a counter variable
 delay_count res 1   ; reserve one byte for counter in the delay routine
-
+;signal generator init
 tables	udata	0x400    ; reserve data anywhere in RAM (here at 0x400)
 myArray res	0x80    ; reserve 128 bytes for message data
 
