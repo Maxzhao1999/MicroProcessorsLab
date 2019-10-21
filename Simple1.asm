@@ -15,16 +15,17 @@ rst	code	0    ; reset vector
 
 pdata	code    ; a section of programme memory for storing data
 	; ******* myTable, data in programme memory, and its length *****
-myTable data	    "omae wa mou shin"	; message, plus carriage return
+myTable data	    "     I hate     mircroprocessors\n"	; message, plus carriage return
 	constant    myTable_l=.17	; length of data
-
+		
 main	code
 	; ******* Programme FLASH read Setup Code ***********************
 setup	bcf	EECON1, CFGS	; point to Flash program memory  
 	bsf	EECON1, EEPGD 	; access Flash program memory
 	call	UART_Setup	; setup UART
 	call	LCD_Setup	; setup LCD
-	call	LCD_ln2		; line 2
+	movlw	0xFF
+	movwf	delay_count
 	goto	start
 ;	call	LCD_Clear
 	
@@ -40,11 +41,21 @@ start 	lfsr	FSR0, myArray	; Load FSR0 with address in RAM
 	movwf 	counter		; our counter register
 loop 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-	decfsz	counter		; count down to zero
+	decfsz	counter	; count down to zero
 	bra	loop		; keep going until finished
-		
 	movlw	myTable_l-1	; output message to LCD (leave out "\n")
 	lfsr	FSR2, myArray
+	call	LCD_Write_Message
+	call	LCD_ln2
+	movlw	myTable_l	; bytes to read
+	movwf 	counter		; our counter register
+	
+loop1 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+		
+	decfsz	counter		; count down to zero
+	bra	loop1
+	movlw	myTable_l-1	; output message to LCD (leave out "\n")
 	call	LCD_Write_Message
 	
 	movlw	myTable_l	; output message to UART
