@@ -48,7 +48,7 @@ read
 	call	read_row
 	call	read_col
 	movff	b47, W
-	andwf	b03, W
+	iorwf	b03, W
 	negf	W
 	decf	W
 	return
