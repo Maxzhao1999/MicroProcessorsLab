@@ -4,6 +4,7 @@
 	extern  LCD_Setup, LCD_Write_Message	    ; external LCD subroutines
 	extern	LCD_Write_Hex			    ; external LCD subroutines
 	extern  ADC_Setup, ADC_Read		    ; external ADC routines
+	extern  convert_to_decimal, dec_0, dec_2
 	
 acs0	udata_acs   ; reserve data space in access ram
 counter	    res 1   ; reserve one byte for a counter variable
@@ -54,9 +55,10 @@ loop 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	
 measure_loop
 	call	ADC_Read
-	movf	ADRESH,W
+	call	convert_to_decimal
+	movf	dec_2,W
 	call	LCD_Write_Hex
-	movf	ADRESL,W
+	movf	dec_0,W
 	call	LCD_Write_Hex
 	goto	measure_loop		; goto current line in code
 
