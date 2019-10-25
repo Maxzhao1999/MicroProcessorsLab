@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 
-	global convert_to_decimal
+	global convert_to_decimal, dec_0, dec_2
 
 acs0    udata_acs   ; named variables in access ram
 ab	res 1   ; reserve 1 byte for variable LCD_cnt_l
@@ -29,15 +29,20 @@ maffs	code
 convert_to_decimal
 	movlw	0x3
 	movwf	count
-	lfsr	FSR0, dec_0
+	lfsr	FSR0, dec_3
 	movff	ADRESH, gh
 	movff	ADRESL, ab
+;	movlw	0x04
+;	movwf	gh
+;	movlw	0xD2
+;	movwf	ab
 	movlw	0x41
 	movwf	cd
 	movlw	0x8A
 	movwf	ef
-	call	m_16_16
+	call	m_16_16	
 loop	movff	re1_3, POSTDEC0
+	clrf	re1_3
 	movlw	0x0A
 	movwf	ab
 	movff	re1_0, ef
@@ -46,16 +51,21 @@ loop	movff	re1_3, POSTDEC0
 	call	m_8_24
 	decfsz	count
 	bra	loop
+	movff	re1_3, POSTDEC0
+	swapf	dec_3, W
+	iorwf	dec_2, F
+	swapf	dec_1, W
+	iorwf	dec_0, F
 	return
 	
 m_8_16		;ab*cdef
-	movff	ab, W
+	movf	ab, W
 	mulwf	ef, ACCESS
 	movff	PRODH, re0_1
 	movff	PRODL, re0_0
 	mulwf	cd, ACCESS
 	movff	PRODH, re0_2
-	movff	PRODL, W
+	movf	PRODL, W
 	addwf	re0_1
 	movlw	0x0
 	addwfc	re0_2
@@ -68,12 +78,12 @@ m_16_16		;ghab*cdef
 	movff	re0_2, re1_2
 	movff	gh,ab
 	call	m_8_16
-	movff	re0_0, W
-	addwf	re1_1, W
+	movf	re0_0, W
+	addwf	re1_1
 	movlw	0x0
 	addwfc	re1_2
-	movff	re0_1, W
-	addwf	re1_2, W
+	movf	re0_1, W
+	addwf	re1_2
 	movlw	0x0
 	movff	re0_2, re1_3
 	addwfc	re1_3
@@ -84,9 +94,9 @@ m_8_24		;ab*ijcdef
 	movff	re0_0, re1_0
 	movff	re0_1, re1_1
 	movff	re0_2, re1_2
-	movff	ab, W
+	movf	ab, W
 	mulwf	ij
-	movff	PRODL, W
+	movf	PRODL, W
 	addwf	re1_2
 	movff	PRODH, re1_3
 	movlw	0x0
