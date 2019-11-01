@@ -138,7 +138,7 @@ comp2
 	movf	thresh, W
 	cpfsgt	cpr2h
 	bra	compare
-	bra	fcounter'
+	bra	fcounter
 	
 comp1
 	movf	thresh, W
