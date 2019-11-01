@@ -1,14 +1,23 @@
 #include p18f87k22.inc
 	
 	global	Timer_Setup
-	extern	f_count
+
+acs0    udata_acs   ; named variables in access ram
+loopsl	res 1   ; reserve 1 byte for variable LCD_cnt_l
+loopsh	res 1
 	
 int_hi	code	0x0008	; high vector, no low vector
-	btfss	INTCON,TMR0IF	; check that this is timer0 interrupt
-	retfie	FAST		; if not then return
-	incf	LATD		; increment PORTD
-	bcf	INTCON,TMR0IF	; clear interrupt flag
+	movf	loopsl, W
+	addlw	0x01
+	movwf	loopsl
+	bc	carry
 	retfie	FAST		; fast return from interrupt
+carry
+	movlw	0x0
+	addwfc	loopsh, 1
+	clrf	loopsl
+	retfie	FAST
+	
 
 DAC	code
 DAC_Setup
@@ -21,5 +30,3 @@ DAC_Setup
 	return
 	
 	end
-
-
