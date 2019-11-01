@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 
-	global convert_to_decimal, dec_0, dec_2
+	global convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl
 
 acs0    udata_acs   ; named variables in access ram
 ab	res 1   ; reserve 1 byte for variable LCD_cnt_l
@@ -19,7 +19,13 @@ dec_0	res 1
 dec_1	res 1
 dec_2	res 1
 dec_3	res 1
-	
+cpr1h	res 1
+cpr1l	res 1
+cpr2h	res 1
+cpr2l	res 1
+f_count	res 1
+thresh	res 1
+thresl	res 1
 acs_ovr	access_ovr
 count res 1   ; reserve 1 byte for variable LCD_hex_tmp	
 
@@ -102,5 +108,42 @@ m_8_24		;ab*ijcdef
 	movlw	0x0
 	addwfc	re1_3
 	return
+
+
+
+fcounter
+	incf	f_count
+waittillow
+	movf	thresh, W
+	movff	ADRESH, cpr2h
+	movff	ADRESL, cpr2l
+	cpfseq	cpr2h
+	bra	comp1
+	movf	thresl, W
+	cpfsgt	cpr2l
+	bra	compare
+	bra	waittillow
+
+compare
+	movff	ADRESH, cpr2h
+	movff	ADRESL, cpr2l
+	movf	thresh, W
+	cpfseq	cpr2h
+	bra	comp2
+	movf	thresl, W
+	cpfsgt	cpr2l
+	bra	compare
+	bra	fcounter
+comp2
+	movf	thresh, W
+	cpfsgt	cpr2h
+	bra	compare
+	bra	fcounter'
+	
+comp1
+	movf	thresh, W
+	cpfsgt	cpr2h
+	bra	compare
+	bra	waittillow
 
 end
