@@ -1,7 +1,7 @@
 #include p18f87k22.inc
 
-	global convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl
-
+	global convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, compare
+	extern frequencyl, frequencyh, ADC_Read
 acs0    udata_acs   ; named variables in access ram
 ab	res 1   ; reserve 1 byte for variable LCD_cnt_l
 cd	res 1   ; reserve 1 byte for variable LCD_cnt_h
@@ -36,8 +36,8 @@ convert_to_decimal
 	movlw	0x3
 	movwf	count
 	lfsr	FSR0, dec_3
-	movff	ADRESH, gh
-	movff	ADRESL, ab
+	movff	frequencyh, gh
+	movff	frequencyl, ab
 ;	movlw	0x04
 ;	movwf	gh
 ;	movlw	0xD2
@@ -115,35 +115,37 @@ fcounter
 	incf	f_count
 waittillow
 	movf	thresh, W
+	call	ADC_Read
 	movff	ADRESH, cpr2h
 	movff	ADRESL, cpr2l
 	cpfseq	cpr2h
-	bra	comp1
+	goto	comp1
 	movf	thresl, W
 	cpfsgt	cpr2l
-	bra	compare
-	bra	waittillow
+	return
+	goto	waittillow
 
 compare
+	call	ADC_Read
 	movff	ADRESH, cpr2h
 	movff	ADRESL, cpr2l
 	movf	thresh, W
 	cpfseq	cpr2h
-	bra	comp2
+	goto	comp2
 	movf	thresl, W
 	cpfsgt	cpr2l
-	bra	compare
-	bra	fcounter
+	goto	compare
+	goto	fcounter
 comp2
 	movf	thresh, W
 	cpfsgt	cpr2h
-	bra	compare
-	bra	fcounter
+	goto	compare
+	goto	fcounter
 	
 comp1
 	movf	thresh, W
 	cpfsgt	cpr2h
-	bra	compare
-	bra	waittillow
+	goto	compare
+	goto	waittillow
 
 end
