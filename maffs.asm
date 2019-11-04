@@ -109,43 +109,46 @@ m_8_24		;ab*ijcdef
 	addwfc	re1_3
 	return
 
-
-
-fcounter
-	incf	f_count
-waittillow
-	movf	thresh, W
-	call	ADC_Read
-	movff	ADRESH, cpr2h
-	movff	ADRESL, cpr2l
-	cpfseq	cpr2h
-	goto	comp1
-	movf	thresl, W
-	cpfsgt	cpr2l
-	return
-	goto	waittillow
-
 compare
-	call	ADC_Read
-	movff	ADRESH, cpr2h
-	movff	ADRESL, cpr2l
-	movf	thresh, W
-	cpfseq	cpr2h
-	goto	comp2
-	movf	thresl, W
-	cpfsgt	cpr2l
-	goto	compare
-	goto	fcounter
-comp2
-	movf	thresh, W
-	cpfsgt	cpr2h
-	goto	compare
-	goto	fcounter
 	
-comp1
-	movf	thresh, W
-	cpfsgt	cpr2h
-	goto	compare
-	goto	waittillow
+
+;fcounter
+;	incf	f_count
+;waittillow
+;	movf	thresh, W
+;	call	ADC_Read
+;	movff	ADRESH, cpr2h
+;	movff	ADRESL, cpr2l
+;	cpfseq	cpr2h
+;	goto	comp1
+;	movf	thresl, W
+;	cpfsgt	cpr2l
+;	return
+;	goto	waittillow
+;
+;compare
+;	call	ADC_Read
+;	movff	ADRESH, cpr2h
+;	movff	ADRESL, cpr2l
+;	movf	thresh, W
+;	cpfseq	cpr2h
+;	goto	comp2
+;	movf	thresl, W
+;	cpfsgt	cpr2l
+;	goto	compare
+;	goto	fcounter
+;comp2
+;	movf	thresh, W
+;	cpfsgt	cpr2h
+;	goto	compare
+;	goto	fcounter
+;	
+;comp1
+;	movf	thresh, W
+;	cpfsgt	cpr2h
+;	goto	compare
+;	goto	waittillow
+
+	
 
 end
