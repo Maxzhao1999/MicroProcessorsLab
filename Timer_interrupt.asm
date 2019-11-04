@@ -1,15 +1,15 @@
 #include p18f87k22.inc
 	
-	global	Timer_Setup
+	global	Timer_Setup, loopsh, loopsl
 
 acs0    udata_acs   ; named variables in access ram
 loopsl	res 1   ; reserve 1 byte for variable LCD_cnt_l
 loopsh	res 1
 	
 int_hi	code	0x0008	; high vector, no low vector
-	movf	loopsl, W
+	movf	loopsl, W, ACCESS
 	addlw	0x01
-	movwf	loopsl
+	movwf	loopsl, ACCESS
 	bc	carry
 	retfie	FAST		; fast return from interrupt
 carry
@@ -20,7 +20,7 @@ carry
 	
 
 DAC	code
-DAC_Setup
+Timer_Setup
 	clrf	TRISD		; Set PORTD as all outputs
 	clrf	LATD		; Clear PORTD outputs
 	movlw	b'10000111'	; Set timer0 to 16-bit, Fosc/4/256
