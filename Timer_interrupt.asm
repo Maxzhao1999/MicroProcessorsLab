@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 	
-	global	Timer_Setup, loopsh, loopsl,fcounter	
+	global	Timer_Setup, loopsh, loopsl,fcounter, CM_Setup	
 	extern  calc, frequencyl, frequencyh
 acs0    udata_acs   ; named variables in access ram
 loopsl	res 1   ; reserve 1 byte for variable LCD_cnt_l
@@ -19,6 +19,7 @@ timer
 	clrf	fcounter
 	clrf	frequencyl
 	clrf	frequencyh
+	bcf	INTCON, TMR0IF
 	retfie	FAST
 	
 
@@ -33,6 +34,10 @@ Timer_Setup
 	return
 	
 CM_Setup
-	movlw	b'10001100'
-	movwf	CM1CON
+	movlb	0xF
+	movlw	b'11011000'
+	movwf	CM1CON, BANKED
+	bcf	TRISF, 2
+	movlb	0x0
+	return
 	end
