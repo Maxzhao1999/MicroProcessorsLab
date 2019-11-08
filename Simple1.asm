@@ -4,14 +4,16 @@
 	extern  LCD_Setup, LCD_Write_Message,LCD_delay_ms	    ; external LCD subroutines
 	extern	LCD_Write_Hex			    ; external LCD subroutines
 	extern  ADC_Setup, ADC_Read		    ; external ADC routines
-	extern  convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, compare
-	extern	Timer_Setup, loopsh, loopsl,fcounter, CM_Setup
-	global	frequencyl, frequencyh, calc
+	extern  convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl
+	extern	Timer_Setup, loopsh, loopsl,fcounterl, fcounterh, CM_Setup
+	global  calc
 acs0	udata_acs   ; reserve data space in access ram
 counter	    res 1   ; reserve one byte for a counter variable
 delay_count res 1   ; reserve one byte for counter in the delay routine
 frequencyl  res 1
 frequencyh  res 1
+bufferfreqh res 1
+bufferfreql res 1
 tables	udata	0x400    ; reserve data anywhere in RAM (here at 0x400)
 myArray res 0x80    ; reserve 128 bytes for message data
 
@@ -62,9 +64,36 @@ start
 ;	call	UART_Transmit_Message
 	
 measure_loop
-;	setf	TRISE
-;	movf	CMSTAT,	PORTE
-;	clrf	TRISE
+;	movf	fcounterh, W
+;	cpfseq	bufferfreqh
+;	bra	compare
+;	movf	fcounterl, W
+;	cpfsgt	bufferfreql
+;	bra	usebuffer
+;	bra	usecurrent
+;	
+;compare
+;	cpfsgt	bufferfreqh
+;	bra	usebuffer
+;	bra	usecurrent
+;usebuffer	
+;	movf	bufferfreqh, W
+;	movwf	fcounterh
+;	movf	bufferfreql, W
+;	movwf	fcounterl
+;	bra	display
+;usecurrent
+;	movwf	bufferfreqh
+;	movf	fcounterl, W
+;	movwf	bufferfreql
+;	
+;	bra	display
+display
+	call	convert_to_decimal
+	movf	dec_2, W, ACCESS
+	call	LCD_Write_Hex
+	movf	dec_0, W, ACCESS
+	call	LCD_Write_Hex
 	bra	measure_loop
 ;	movlw	0x0B
 ;	movwf	thresh
@@ -101,31 +130,27 @@ measure_loop
 ;	call	LCD_Write_Hex
 ;	calc
 calc
-	movlw	0x02
-	subwf	fcounter
-	movlw	0x01
-	addwf	frequencyl
-	bc	carry
-	movlw	0x02
-	cpfsgt	fcounter
-	bra	display
-	bra	calc
-display
-	call	convert_to_decimal
-	movf	dec_2, W, ACCESS
-	call	LCD_Write_Hex
-	movf	dec_0, W, ACCESS
-	call	LCD_Write_Hex
+;	movlw	0x02
+;	subwf	fcounter
+;	movlw	0x01
+;	addwf	frequencyl
+;	bc	carry
+;	movlw	0x02
+;	cpfsgt	fcounter
+;	bra	display
+;	bra	calc
+
+
 
 ;	movf	dec_0, W, ACCESS
 ;	call	LCD_Write_Hex
 ;	call	delay
 	return
-carry
-	movlw	0x0
-	addwfc	frequencyh, 1
-	clrf	frequencyl
-	return
+;carry
+;	movlw	0x0
+;	addwfc	frequencyh, 1
+;	clrf	frequencyl
+;	return
 	
 	
 ;	clrf	fcounter
