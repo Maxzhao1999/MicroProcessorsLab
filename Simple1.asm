@@ -4,7 +4,7 @@
 	extern  LCD_Setup, LCD_Write_Message,LCD_delay_ms	    ; external LCD subroutines
 	extern	LCD_Write_Hex			    ; external LCD subroutines
 	extern  ADC_Setup, ADC_Read		    ; external ADC routines
-;	extern  convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, compare
+	extern  convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, compare
 	extern	Timer_Setup, loopsh, loopsl,fcounter, CM_Setup
 	global	frequencyl, frequencyh, calc
 acs0	udata_acs   ; reserve data space in access ram
@@ -30,7 +30,7 @@ setup	bcf	EECON1, CFGS	; point to Flash program memory
 	call	UART_Setup	; setup UART
 	call	LCD_Setup	; setup LCD
 	call	ADC_Setup	; setup ADC
-;	call	Timer_Setup
+	call	Timer_Setup
 	call	CM_Setup
 	movlw	0x0
 	movwf	loopsh
@@ -111,12 +111,12 @@ calc
 	bra	display
 	bra	calc
 display
-;	call	convert_to_decimal
-	
-	movf	frequencyl, W, ACCESS
+	call	convert_to_decimal
+	movf	dec_2, W, ACCESS
 	call	LCD_Write_Hex
-	movf	frequencyh, W, ACCESS
+	movf	dec_0, W, ACCESS
 	call	LCD_Write_Hex
+
 ;	movf	dec_0, W, ACCESS
 ;	call	LCD_Write_Hex
 ;	call	delay
