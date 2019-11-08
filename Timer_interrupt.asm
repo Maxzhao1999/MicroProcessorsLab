@@ -36,7 +36,7 @@ Timer_Setup
 	
 CM_Setup
 	movlb	0xF
-	movlw	b'11011000'
+	movlw	b'11001000'
 	movwf	CM1CON, BANKED
 	bcf	TRISF, 2
 	movlb	0x0
