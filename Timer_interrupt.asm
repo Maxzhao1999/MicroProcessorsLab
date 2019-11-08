@@ -13,6 +13,7 @@ int_hi	code	0x0008	; high vector, no low vector
 	movf	fcounter, W, ACCESS
 	addlw	0x01
 	movwf	fcounter, ACCESS
+	bcf	PIR6, CMP1IF
 	retfie	FAST		; fast return from interrupt
 timer
 	call	calc
@@ -39,5 +40,9 @@ CM_Setup
 	movwf	CM1CON, BANKED
 	bcf	TRISF, 2
 	movlb	0x0
+	bsf	INTCON,PEIE
+	bsf	PIE6, CMP1IE
+	bcf	PIR6, CMP1IF
+	bsf	INTCON,GIE	; Enable all interrupts
 	return
 	end
