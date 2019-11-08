@@ -1,7 +1,7 @@
 #include p18f87k22.inc
 
 	global convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, compare
-	extern frequencyl, frequencyh, ADC_Read
+	extern ADC_Read,fcounterl, fcounterh
 acs0    udata_acs   ; named variables in access ram
 ab	res 1   ; reserve 1 byte for variable LCD_cnt_l
 cd	res 1   ; reserve 1 byte for variable LCD_cnt_h
@@ -36,8 +36,8 @@ convert_to_decimal
 	movlw	0x3
 	movwf	count
 	lfsr	FSR0, dec_3
-	movff	frequencyh, gh
-	movff	frequencyl, ab
+	movff	fcounterh, gh
+	movff	fcounterl, ab
 ;	movlw	0x04
 ;	movwf	gh
 ;	movlw	0xD2
@@ -150,5 +150,4 @@ compare
 ;	goto	waittillow
 
 	
-
 end
