@@ -1,42 +1,42 @@
 	#include p18f87k22.inc
 
 	extern	UART_Setup, UART_Transmit_Message   ; external UART subroutines
-	extern  LCD_Setup, LCD_Write_Message,LCD_delay_ms	    ; external LCD subroutines
+	extern	LCD_Setup, LCD_Write_Message,LCD_delay_ms	    ; external LCD subroutines
 	extern	LCD_Write_Hex			    ; external LCD subroutines
-	extern  ADC_Setup, ADC_Read		    ; external ADC routines
-	extern  convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl
-	extern	Timer_Setup, loopsh, loopsl,fcounterl, fcounterh, CM_Setup
-	global  calc
-acs0	udata_acs   ; reserve data space in access ram
+	extern	ADC_Setup, ADC_Read		    ; external ADC routines
+	extern	convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl	; external hex to decimal routines
+	extern	Timer_Setup, loopsh, loopsl,fcounterl, fcounterh, CM_Setup	; external timer interrupt routines
+	global	 calc
+acs0	    udata_acs   ; reserve data space in access ram
 counter	    res 1   ; reserve one byte for a counter variable
-delay_count res 1   ; reserve one byte for counter in the delay routine
-frequencyl  res 1
-frequencyh  res 1
-bufferfreqh res 1
-bufferfreql res 1
-tables	udata	0x400    ; reserve data anywhere in RAM (here at 0x400)
-myArray res 0x80    ; reserve 128 bytes for message data
+delay_count    res 1   ; reserve one byte for counter in the delay routine
+frequencyl	    res 1   ; reserve one byte for frequency high byte
+frequencyh	    res 1   ; reserve one byte for frequency low byte
+bufferfreqh	    res 1   ; reserve one byte for buffer high byte
+bufferfreql	    res 1   ; reserve one byte for buffer low byte
+tables	    udata	0x400    ; reserve data anywhere in RAM (here at 0x400)
+myArray	    res 0x80    ; reserve 128 bytes for message data
 
 rst	code	0    ; reset vector
 	goto	setup
 
-pdata	code    ; a section of programme memory for storing data
-	; ******* myTable, data in programme memory, and its length *****
-;myTable data	    "Hello World!\n"	; message, plus carriage return
-;	constant    myTable_l=.13	; length of data
+pdata	code	 ; a section of programme memory for storing data
+		; ******* myTable, data in programme memory, and its length *****
+		;myTable data	    "Hello World!\n"	; message, plus carriage return
+		;	constant    myTable_l=.13	; length of data
 	
 main	code
 	; ******* Programme FLASH read Setup Code ***********************
 setup	bcf	EECON1, CFGS	; point to Flash program memory  
 	bsf	EECON1, EEPGD 	; access Flash program memory
 	call	UART_Setup	; setup UART
-	call	LCD_Setup	; setup LCD
-	call	ADC_Setup	; setup ADC
-	call	Timer_Setup
-	call	CM_Setup
-	movlw	0x0
-	movwf	loopsh
-	movwf	loopsl
+	call	LCD_Setup		; setup LCD
+	call	ADC_Setup		; setup ADC
+	call	Timer_Setup	; setup Timer interrupt
+	call	CM_Setup		; setup comparator
+	movlw	0x0	
+	movwf	loopsh		; reset loopsh byte 
+	movwf	loopsl		; reset loopsl byte
 	goto	start
 	
 	; ******* Main programme ****************************************
@@ -89,11 +89,11 @@ measure_loop
 ;	
 ;	bra	display
 display
-	call	convert_to_decimal
-	movf	dec_2, W, ACCESS
-	call	LCD_Write_Hex
-	movf	dec_0, W, ACCESS
-	call	LCD_Write_Hex
+	call	convert_to_decimal ; hex to decimal conversion
+	movf	dec_2, W, ACCESS   ; read data from dec_2
+	call	LCD_Write_Hex	   ; write high decimal byte to LCD
+	movf	dec_0, W, ACCESS   ; read data from dec_0
+	call	LCD_Write_Hex	   ; write low decimal byte to LCD
 	bra	measure_loop
 ;	movlw	0x0B
 ;	movwf	thresh
@@ -161,7 +161,7 @@ calc
 ;	bra delay
 ;	return
 
-delay
+delay				; large delay loop, approximately 1s
 	movlw	0x0F
 	movwf	0x09, ACCESS
 dloop	call	delayx
