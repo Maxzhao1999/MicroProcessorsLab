@@ -62,32 +62,37 @@ start
 ;	movlw	myTable_l	; output message to UART
 ;	lfsr	FSR2, myArray
 ;	call	UART_Transmit_Message
+	movlw	0x0
+	movwf	bufferfreqh
+	movwf	bufferfreql
+	movwf	fcounterh
+	movwf	fcounterl
 	
 measure_loop
-;	movf	fcounterh, W
-;	cpfseq	bufferfreqh
-;	bra	compare
-;	movf	fcounterl, W
-;	cpfsgt	bufferfreql
-;	bra	usebuffer
-;	bra	usecurrent
-;	
-;compare
-;	cpfsgt	bufferfreqh
-;	bra	usebuffer
-;	bra	usecurrent
-;usebuffer	
-;	movf	bufferfreqh, W
-;	movwf	fcounterh
-;	movf	bufferfreql, W
-;	movwf	fcounterl
-;	bra	display
-;usecurrent
-;	movwf	bufferfreqh
-;	movf	fcounterl, W
-;	movwf	bufferfreql
-;	
-;	bra	display
+	movf	fcounterh, W
+	cpfseq	bufferfreqh
+	bra	compare
+	movf	fcounterl, W
+	cpfsgt	bufferfreql
+	bra	usecurrent
+	bra	usebuffer
+	
+compare
+	cpfsgt	bufferfreqh
+	bra	usecurrent
+	bra	usebuffer
+usebuffer	
+	movf	bufferfreqh, W
+	movwf	fcounterh
+	movf	bufferfreql, W
+	movwf	fcounterl
+	bra	display
+usecurrent
+	movf	fcounterh, W
+	movwf	bufferfreqh
+	movf	fcounterl, W
+	movwf	bufferfreql
+
 display
 	call	convert_to_decimal ; hex to decimal conversion
 	movf	dec_2, W, ACCESS   ; read data from dec_2
@@ -184,4 +189,6 @@ dloopy
 	decfsz	0x11, f, ACCESS
 	bra	dloopy
 	return
+	
+
 	end
