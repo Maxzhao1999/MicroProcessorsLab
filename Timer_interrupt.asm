@@ -26,8 +26,6 @@ timer
 	movwf	fcounterh		; store W register value to fcounterh
 	clrf	fcounter1		; reset fcounter1 value
 	clrf	fcounter2		; reset fcounter2 value
-;	clrf	frequencyl
-;	clrf	frequencyh
 	bcf	INTCON, TMR0IF	; timer0 did not overflow
 	retfie	FAST
 carry
