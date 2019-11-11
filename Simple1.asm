@@ -1,7 +1,7 @@
 	#include p18f87k22.inc
 
 	extern	UART_Setup, UART_Transmit_Message   ; external UART subroutines
-	extern	LCD_Setup, LCD_Write_Message,LCD_delay_ms	    ; external LCD subroutines
+	extern	LCD_Setup, LCD_Write_Message,LCD_delay_ms,LCD_ln2	    ; external LCD subroutines
 	extern	LCD_Write_Hex			    ; external LCD subroutines
 	extern	ADC_Setup, ADC_Read		    ; external ADC routines
 	extern	convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl	; external hex to decimal routines
@@ -22,8 +22,9 @@ rst	code	0    ; reset vector
 
 pdata	code	 ; a section of programme memory for storing data
 		; ******* myTable, data in programme memory, and its length *****
-		;myTable data	    "Hello World!\n"	; message, plus carriage return
-		;	constant    myTable_l=.13	; length of data
+myTable data	    "I think ur f is this\n"	; message, plus carriage return
+	constant    myTable_l=.17	; length of data
+
 	
 main	code
 	; ******* Programme FLASH read Setup Code ***********************
@@ -41,24 +42,35 @@ setup	bcf	EECON1, CFGS	; point to Flash program memory
 	
 	; ******* Main programme ****************************************
 start 	
-;	lfsr	FSR0, myArray	; Load FSR0 with address in RAM	
-;	movlw	upper(myTable)	; address of data in PM
-;	movwf	TBLPTRU		; load upper bits to TBLPTRU
-;	movlw	high(myTable)	; address of data in PM
-;	movwf	TBLPTRH		; load high byte to TBLPTRH
-;	movlw	low(myTable)	; address of data in PM
-;	movwf	TBLPTRL		; load low byte to TBLPTRL
-;	movlw	myTable_l	; bytes to read
-;	movwf 	counter		; our counter register
-;loop 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
-;	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-;	decfsz	counter		; count down to zero
-;	bra	loop		; keep going until finished
-;		
-;	movlw	myTable_l-1	; output message to LCD (leave out "\n")
-;	lfsr	FSR2, myArray
-;	call	LCD_Write_Message
-
+	lfsr	FSR0, myArray	; Load FSR0 with address in RAM	
+	movlw	upper(myTable)	; address of data in PM
+	movwf	TBLPTRU		; load upper bits to TBLPTRU
+	movlw	high(myTable)	; address of data in PM
+	movwf	TBLPTRH		; load high byte to TBLPTRH
+	movlw	low(myTable)	; address of data in PM
+	movwf	TBLPTRL		; load low byte to TBLPTRL
+	movlw	myTable_l	; bytes to read
+	movwf 	counter		; our counter register
+loop 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+	decfsz	counter		; count down to zero
+	bra	loop		; keep going until finished
+	movlw	myTable_l-1	; output message to LCD (leave out "\n")
+	lfsr	FSR2, myArray
+	call	LCD_Write_Message
+	
+	movlw	myTable_l	; bytes to read
+	movwf 	counter		; our counter register
+	movlw	.12
+	subwf	counter
+loop1 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0
+	decfsz	counter		; count down to zero
+	bra	loop1
+	movlw	b'11000000'
+	call	LCD_ln2	
+	movlw	myTable_l-.13	; output message to LCD (leave out "\n")
+	call	LCD_Write_Message
 ;	movlw	myTable_l	; output message to UART
 ;	lfsr	FSR2, myArray
 ;	call	UART_Transmit_Message
@@ -113,6 +125,8 @@ usecurrent
 
 
 display
+	movlw	b'11000101'
+	call	LCD_ln2
 	call	convert_to_decimal ; hex to decimal conversion
 	movf	dec_2, W, ACCESS   ; read data from dec_2
 	call	LCD_Write_Hex	   ; write high decimal byte to LCD
