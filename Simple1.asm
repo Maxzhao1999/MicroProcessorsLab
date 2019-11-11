@@ -67,12 +67,26 @@ start
 	movwf	bufferfreql
 	movwf	fcounterh
 	movwf	fcounterl
-;	bra	measure_loop
+	bra	measure_loop
 
+waiting
+	movlw	0x0
+	movwf	bufferfreqh
+	movwf	bufferfreql
+	movlw	0x10
+waiting_loop	
+	
+	cpfsgt	fcounterl
+	bra	waiting_loop
+	call	delay
+	clrf	fcounterh
+	movwf	fcounterl
+	bra	measure_loop
+	
 measure_loop
 	movlw	0x1
 	cpfsgt	fcounterl
-	bra	usecurrent
+	bra	waiting
 	movf	fcounterh, W
 	cpfseq	bufferfreqh
 	bra	compare
@@ -104,6 +118,9 @@ display
 	call	LCD_Write_Hex	   ; write high decimal byte to LCD
 	movf	dec_0, W, ACCESS   ; read data from dec_0
 	call	LCD_Write_Hex	   ; write low decimal byte to LCD
+;	movlw	0x0
+;	movwf	fcounterh
+;	movwf	fcounterl
 	bra	measure_loop
 ;	movlw	0x0B
 ;	movwf	thresh
