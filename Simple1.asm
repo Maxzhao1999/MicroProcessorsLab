@@ -67,8 +67,12 @@ start
 	movwf	bufferfreql
 	movwf	fcounterh
 	movwf	fcounterl
-	
+;	bra	measure_loop
+
 measure_loop
+	movlw	0x1
+	cpfsgt	fcounterl
+	bra	usecurrent
 	movf	fcounterh, W
 	cpfseq	bufferfreqh
 	bra	compare
@@ -92,6 +96,7 @@ usecurrent
 	movwf	bufferfreqh
 	movf	fcounterl, W
 	movwf	bufferfreql
+
 
 display
 	call	convert_to_decimal ; hex to decimal conversion
