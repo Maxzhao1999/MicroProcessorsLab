@@ -7,7 +7,7 @@ LCD_cnt_l   res 1   ; reserve 1 byte for variable LCD_cnt_l
 LCD_cnt_h   res 1   ; reserve 1 byte for variable LCD_cnt_h
 LCD_cnt_ms  res 1   ; reserve 1 byte for ms counter
 LCD_tmp	    res 1   ; reserve 1 byte for temporary use
-LCD_counter res 1   ; reserve 1 byte for counting through nessage
+LCD_counter res 1   ; reserve 1 byte for counting through message
 
 acs_ovr	access_ovr
 LCD_hex_tmp res 1   ; reserve 1 byte for variable LCD_hex_tmp	
@@ -67,7 +67,7 @@ LCD_Hex_Nib	    ; writes low nibble as hex character
 	
 LCD_Write_Message	    ; Message stored at FSR2, length stored in W
 	movwf   LCD_counter
-LCD_Loop_message
+LCD_Loop_message	    ; send data stored in W to data reg
 	movf    POSTINC2, W
 	call    LCD_Send_Byte_D
 	decfsz  LCD_counter
