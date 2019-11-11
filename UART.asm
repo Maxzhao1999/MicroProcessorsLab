@@ -20,7 +20,7 @@ UART_Setup
 
 UART_Transmit_Message	    ; Message stored at FSR2, length stored in W
     movwf   UART_counter
-UART_Loop_message
+UART_Loop_message	    ; loop writing messge to LCD
     movf    POSTINC2, W
     call    UART_Transmit_Byte
     decfsz  UART_counter
