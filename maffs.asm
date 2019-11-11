@@ -5,10 +5,10 @@
 acs0    udata_acs   ; named variables in access ram
 ab	res 1   ; reserve 1 byte for variable LCD_cnt_l
 cd	res 1   ; reserve 1 byte for variable LCD_cnt_h
-ef	res 1   ; reserve 1 byte for ms counter
+ef	res 1   
 gh	res 1
 ij	res 1
-re0_0	res 1   ; reserve 1 byte for counting through nessage
+re0_0	res 1  
 re0_1	res 1
 re0_2	res 1
 re1_0	res 1
@@ -32,10 +32,10 @@ count res 1   ; reserve 1 byte for variable LCD_hex_tmp
 
 maffs	code
 
-convert_to_decimal
+convert_to_decimal		; hex to decimal conversion 
 	movlw	0x3
-	movwf	count
-	lfsr	FSR0, dec_3
+	movwf	count		
+	lfsr	FSR0, dec_3	
 	movff	fcounterh, gh
 	movff	fcounterl, ab
 ;	movlw	0x04
@@ -64,7 +64,7 @@ loop	movff	re1_3, POSTDEC0
 	iorwf	dec_0, F
 	return
 	
-m_8_16		;ab*cdef
+m_8_16		;ab*cdef , 8 bit X 16 bit multiplication
 	movf	ab, W
 	mulwf	ef, ACCESS
 	movff	PRODH, re0_1
@@ -77,7 +77,7 @@ m_8_16		;ab*cdef
 	addwfc	re0_2
 	return
 
-m_16_16		;ghab*cdef
+m_16_16		;ghab*cdef, 16 bit X 16 bit multiplication
 	call	m_8_16
 	movff	re0_0, re1_0
 	movff	re0_1, re1_1
@@ -95,7 +95,7 @@ m_16_16		;ghab*cdef
 	addwfc	re1_3
 	return
 	
-m_8_24		;ab*ijcdef
+m_8_24		;ab*ijcdef, 8 X 24 multiplication
 	call	m_8_16
 	movff	re0_0, re1_0
 	movff	re0_1, re1_1
