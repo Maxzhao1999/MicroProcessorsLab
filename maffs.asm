@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 
-	global convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, compare
+	global convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, percent
 	extern ADC_Read,fcounterl, fcounterh
 acs0    udata_acs   ; named variables in access ram
 ab	res 1   ; reserve 1 byte for variable LCD_cnt_l
@@ -26,6 +26,13 @@ cpr2l	res 1
 f_count	res 1
 thresh	res 1
 thresl	res 1
+bytef	res 1
+divcount res 1
+mulcount res 1
+copy3	 res 1
+copy2	 res 1
+carry3	 res 1
+carry2   res 1
 acs_ovr	access_ovr
 count res 1   ; reserve 1 byte for variable LCD_hex_tmp	
 
@@ -109,9 +116,51 @@ m_8_24		;ab*ijcdef, 8 X 24 multiplication
 	addwfc	re1_3
 	return
 
-compare
 	
-
+percent
+	movlw	0x6
+divi
+	movwf	divcount
+	decf	divcount
+	clrf	bytef
+	rrcf	fcounterh
+	rrcf	fcounterl
+	rrncf	bytef
+	movlw	0x1
+	cpfslt	divcount
+	bra	divi
+	movlw	0x03
+multi
+	movwf	mulcount
+	decf	mulcount
+	movf	bytef, W
+	movwf	copy3
+	addwf	bytef
+	clrf	W
+	addwfc	carry3
+	movf	copy3, W
+	addwf	bytef
+	clrf	W
+	addwfc	carry3	;above calculates the last layer
+	movf	fcounterl, W
+	movwf	copy2
+	addwf	fcounterl
+	clrf	W
+	addwfc	carry2
+	movf	copy2, W
+	addwf	fcounterl
+	clrf	W
+	addwfc	carry2  ; above calculates the second last
+	movf	fcounterh, W
+	addwf	fcounterh, 0
+	addwf	fcounterh, 1 ; above calculates first layer
+	movf	carry3, W
+	addwf	fcounterl 
+	clrf	W
+	addwfc	fcounterh  ; add carry to second layer, carry to 1st layer
+	movf	carry2, W
+	addwf	fcounterh  ; add carry to first layer
+	return
 ;fcounter
 ;	incf	f_count
 ;waittillow
