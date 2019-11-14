@@ -4,7 +4,7 @@
 	extern	LCD_Setup, LCD_Write_Message,LCD_delay_ms,LCD_ln2	    ; external LCD subroutines
 	extern	LCD_Write_Hex			    ; external LCD subroutines
 	extern	ADC_Setup, ADC_Read		    ; external ADC routines
-	extern	convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl	; external hex to decimal routines
+	extern	convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, percent	; external hex to decimal routines
 	extern	Timer_Setup, loopsh, loopsl,fcounterl, fcounterh, CM_Setup	; external timer interrupt routines
 	global	 calc
 acs0	    udata_acs   ; reserve data space in access ram
@@ -90,13 +90,13 @@ waiting_loop
 	
 	cpfsgt	fcounterl
 	bra	waiting_loop
-	call	delay
+;	call	delay
 	clrf	fcounterh
-	movwf	fcounterl
+;	movwf	fcounterl
 	bra	measure_loop
 	
 measure_loop
-	movlw	0x1
+	movlw	0x0A
 	cpfsgt	fcounterl
 	bra	waiting
 	movf	fcounterh, W
@@ -127,6 +127,7 @@ usecurrent
 display
 	movlw	b'11000101'
 	call	LCD_ln2
+	call	percent
 	call	convert_to_decimal ; hex to decimal conversion
 	movf	dec_2, W, ACCESS   ; read data from dec_2
 	call	LCD_Write_Hex	   ; write high decimal byte to LCD
@@ -203,7 +204,7 @@ calc
 ;	return
 
 delay				; large delay loop, approximately 1s
-	movlw	0x0F
+	movlw	0x01
 	movwf	0x09, ACCESS
 dloop	call	delayx
 	decfsz	0x09, f, ACCESS
