@@ -57,4 +57,4 @@ CM_Setup
 	bcf	PIR6, CMP1IF	; reset comparator1 interrupt
 	bsf	INTCON,GIE	; Enable all interrupts
 	return
-	end
+	end 
