@@ -33,6 +33,9 @@ copy3	 res 1
 copy2	 res 1
 carry3	 res 1
 carry2   res 1
+blah   res 1      
+backuph  res 1
+backupl  res 1
 acs_ovr	access_ovr
 count res 1   ; reserve 1 byte for variable LCD_hex_tmp	
 
@@ -118,48 +121,75 @@ m_8_24		;ab*ijcdef, 8 X 24 multiplication
 
 	
 percent
-	movlw	0x6
-divi
-	movwf	divcount
-	decf	divcount
-	clrf	bytef
-	rrcf	fcounterh
-	rrcf	fcounterl
-	rrncf	bytef
-	movlw	0x1
-	cpfslt	divcount
-	bra	divi
-	movlw	0x03
-multi
-	movwf	mulcount
-	decf	mulcount
-	movf	bytef, W
-	movwf	copy3
-	addwf	bytef
-	clrf	W
-	addwfc	carry3
-	movf	copy3, W
-	addwf	bytef
-	clrf	W
-	addwfc	carry3	;above calculates the last layer
-	movf	fcounterl, W
-	movwf	copy2
-	addwf	fcounterl
-	clrf	W
-	addwfc	carry2
-	movf	copy2, W
-	addwf	fcounterl
-	clrf	W
-	addwfc	carry2  ; above calculates the second last
 	movf	fcounterh, W
-	addwf	fcounterh, 0
-	addwf	fcounterh, 1 ; above calculates first layer
-	movf	carry3, W
-	addwf	fcounterl 
+	movwf	backuph
+	movf	fcounterl, W
+	movwf	backupl
+	movlw	0x6
+	movwf	divcount
+divi
+	decf	divcount
+;	clrf	bytef
+	addwfc	blah
+	rrcf	backuph,1,ACCESS
+	rrcf	backupl,1,ACCESS
+;	rrcf	bytef
+	tstfsz	divcount
+	bra	divi
+multi
+;	movf	bytef, W
+;	movwf	copy3
+;	addwf	bytef
 	clrf	W
-	addwfc	fcounterh  ; add carry to second layer, carry to 1st layer
-	movf	carry2, W
-	addwf	fcounterh  ; add carry to first layer
+;	clrf	carry3,0	;clear carry3 before storing new values to it
+;	addwfc	carry3
+;	movf	copy3, W
+;	addwf	bytef
+;	clrf	W
+;	addwfc	carry3	;above calculates the last layer
+;	movf	backupl, W
+;	movwf	copy2
+;	addwf	backupl
+;	clrf	W
+;	addwfc	carry2
+;	movf	copy2, W
+;	addwf	backupl
+;	clrf	W
+;	addwfc	carry2  ; above calculates the second last
+;	movf	backuph, W
+;	addwf	backuph, 0
+;	addwf	backuph, 1 ; above calculates first layer
+;	movf	carry3, W
+;	addwf	backupl
+;	clrf	W
+;	addwfc	backuph  ; add carry to second layer, carry to 1st layer
+;	movf	carry2, W
+;	addwf	backuph  ; add carry to first layer
+;	movf	backupl, W
+;	subwf	fcounterl
+;	bc	noborrow
+;	movf	backuph, W
+;	subwfb	fcounterh
+	movlw	0x03
+	mulwf	backupl
+	movff	PRODL, backupl
+	movff	PRODH, copy3
+	movlw	0x03
+	mulwf	backuph
+	movff	PRODL, backuph
+	movf	copy3, W
+	addwf	backuph
+	movf	backupl, W
+	subwf	fcounterl
+	bc	noborrow
+	movf	backuph, W
+	subwfb	fcounterh	
+	
+	return
+noborrow
+	movf	backuph, W
+	subwf	fcounterh
+	
 	return
 ;fcounter
 ;	incf	f_count
