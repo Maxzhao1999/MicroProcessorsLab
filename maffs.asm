@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 
-	global convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, percent
+	global convert_to_decimal, dec_0, dec_2, cpr1h, cpr1l, cpr2h, cpr2l, f_count, thresh, thresl, percent, copy1, copy2
 	extern ADC_Read,fcounterl, fcounterh
 acs0    udata_acs   ; named variables in access ram
 ab	res 1   ; reserve 1 byte for variable LCD_cnt_l
@@ -29,6 +29,7 @@ thresl	res 1
 bytef	res 1
 divcount res 1
 mulcount res 1
+copy1	 res 1   
 copy3	 res 1
 copy2	 res 1
 carry3	 res 1
@@ -46,8 +47,8 @@ convert_to_decimal		; hex to decimal conversion
 	movlw	0x3
 	movwf	count		
 	lfsr	FSR0, dec_3	
-	movff	fcounterh, gh
-	movff	fcounterl, ab
+	movff	copy2, gh
+	movff	copy1, ab
 ;	movlw	0x04
 ;	movwf	gh
 ;	movlw	0xD2
@@ -123,8 +124,10 @@ m_8_24		;ab*ijcdef, 8 X 24 multiplication
 percent
 	movf	fcounterh, W
 	movwf	backuph
+	movwf	copy2
 	movf	fcounterl, W
 	movwf	backupl
+	movwf	copy1
 	movlw	0x6
 	movwf	divcount
 divi
@@ -140,7 +143,7 @@ multi
 ;	movf	bytef, W
 ;	movwf	copy3
 ;	addwf	bytef
-	clrf	W
+;	clrf	W
 ;	clrf	carry3,0	;clear carry3 before storing new values to it
 ;	addwfc	carry3
 ;	movf	copy3, W
@@ -180,16 +183,22 @@ multi
 	movf	copy3, W
 	addwf	backuph
 	movf	backupl, W
-	subwf	fcounterl
+	subwf	copy1
 	bc	noborrow
+	movlw	0xFF
+	subfwb	copy1
 	movf	backuph, W
-	subwfb	fcounterh	
+	subwfb	copy2
+;	movff	copy2, fcounterh
+;	movff	copy1, fcounterl
 	
 	return
 noborrow
 	movf	backuph, W
-	subwf	fcounterh
-	
+	subwf	copy2
+;	movff	copy2, fcounterh
+;	movff	copy1, fcounterl
+;	
 	return
 ;fcounter
 ;	incf	f_count
