@@ -71,9 +71,6 @@ loop1 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	call	LCD_ln2	
 	movlw	myTable_l-.13	; output message to LCD (leave out "\n")
 	call	LCD_Write_Message
-;	movlw	myTable_l	; output message to UART
-;	lfsr	FSR2, myArray
-;	call	UART_Transmit_Message
 	movlw	0x0
 	movwf	bufferfreqh
 	movwf	bufferfreql
@@ -81,21 +78,22 @@ loop1 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movwf	fcounterl
 	bra	measure_loop
 
-waiting
+waiting		; waiting for the signal input, reset bufferfreqh and bufferfreql
 	movlw	0x0
 	movwf	bufferfreqh
 	movwf	bufferfreql
 	movlw	0x10
-waiting_loop	
-	
+waiting_loop	;waiting for the signal input, keep cheking whether the frequency counted is greater than 0x10
+		; if not > 0x10, keep waiting, if >0x10, call measure loop  	
 	cpfsgt	fcounterl
 	bra	waiting_loop
 	call	delay
 	clrf	fcounterh
-;	movwf	fcounterl
 	bra	measure_loop
 	
-measure_loop
+measure_loop	; compare the measured value with buffer value, 
+		; if greater, used measured value and set buffer value to this
+		; if smaller,use buffer value
 	movlw	0x0A
 	cpfsgt	fcounterl
 	bra	waiting
@@ -124,7 +122,7 @@ usecurrent
 	movwf	bufferfreql
 
 
-display
+display	; display on the second line of LCD
 	movlw	b'11000101'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 	call	LCD_ln2
 	call	percent

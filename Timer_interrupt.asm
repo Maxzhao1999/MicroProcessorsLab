@@ -19,7 +19,7 @@ int_hi	code	0x0008	; high vector, no low vector
 	bc	carry		; branch to carry
 	bcf	PIR6, CMP1IF	; reset comparator1 interrupt
 	retfie	FAST		; fast return from interrupt
-timer
+timer	;when there is an edge-to-edge transition, the fcounter value +1, they will be cleared once there is an interrupt by timer 
 	movf	fcounter1, W	; move founter1 to W register
 	movwf	fcounterl		; store W register value to fcounterl
 	movf	fcounter2, W	; move founter2 to W register
@@ -37,7 +37,7 @@ carry
 	
 
 DAC	
-Timer_Setup
+Timer_Setup	;setup timer, counts from 0x0000 to 0xFFFF with a frequency of 62.5kHz
 	clrf	TRISD		; Set PORTD as all outputs
 	clrf	LATD		; Clear PORTD outputs
 	movlw	b'10000111'	; Set timer0 to 16-bit, Fosc/4/256
@@ -46,7 +46,7 @@ Timer_Setup
 	bsf	INTCON,GIE	; Enable all interrupts
 	return
 	
-CM_Setup
+CM_Setup		 ;setup comparator
 	movlb	0xF		; call bank 15
 	movlw	b'11001000'	; enable comparator1, interrupts are generate when low-to-high transition happens
 	movwf	CM1CON, BANKED	; setup comparator1

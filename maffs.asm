@@ -44,15 +44,14 @@ count res 1   ; reserve 1 byte for variable LCD_hex_tmp
 maffs	code
 
 convert_to_decimal		; hex to decimal conversion 
-	movlw	0x3
+	; this subroutine converts a hex number to decimal numbers by multiplying 0x042D, storing the first digit
+	; then multiply the result with 0x0A three times, each time save the first digit, displaying those numbers in order
+	; the result is the corrospoding decimal number, this method is only valid from 0000 to 9999.
+	movlw	0x3? 
 	movwf	count		
 	lfsr	FSR0, dec_3	
 	movff	copy2, gh
 	movff	copy1, ab
-;	movlw	0x04
-;	movwf	gh
-;	movlw	0xD2
-;	movwf	ab
 	movlw	0x41
 	movwf	cd
 	movlw	0x8A
@@ -121,121 +120,48 @@ m_8_24		;ab*ijcdef, 8 X 24 multiplication
 	return
 
 	
-percent
+percent	;eliminiting the 5% systematic error due to the microprocessor
+	; this subroutine takes the value of frequency measured , then substract 5% from the original value
+	; the value is first divided by 64(decimal) via the roll right operation
+	; then the new value is multiplied by 0x03 and stroed to copy3 
+	; in the end , the original value substract the value in copy3 and stored in copy2 and cpoy1, copy2 represents the higer digit of the frequency
 	movf	fcounterh, W
-	movwf	backuph
-	movwf	copy2
-	movf	fcounterl, W
+	movwf	backuph	    
+	movwf	copy2	    ; store the higher two digits of the frequency to backuph and copy2
+	movf	fcounterl, W	
 	movwf	backupl
-	movwf	copy1
+	movwf	copy1	    ; store the lower two digits of the frequency to backupl and copy1
 	movlw	0x6
-	movwf	divcount
-divi
+	movwf	divcount	    
+divi			    ; operate division by 2 six times, divison by 64 in total
 	decf	divcount
-;	clrf	bytef
 	addwfc	blah
 	rrcf	backuph,1,ACCESS
 	rrcf	backupl,1,ACCESS
-;	rrcf	bytef
 	tstfsz	divcount
 	bra	divi
-multi
-;	movf	bytef, W
-;	movwf	copy3
-;	addwf	bytef
-;	clrf	W
-;	clrf	carry3,0	;clear carry3 before storing new values to it
-;	addwfc	carry3
-;	movf	copy3, W
-;	addwf	bytef
-;	clrf	W
-;	addwfc	carry3	;above calculates the last layer
-;	movf	backupl, W
-;	movwf	copy2
-;	addwf	backupl
-;	clrf	W
-;	addwfc	carry2
-;	movf	copy2, W
-;	addwf	backupl
-;	clrf	W
-;	addwfc	carry2  ; above calculates the second last
-;	movf	backuph, W
-;	addwf	backuph, 0
-;	addwf	backuph, 1 ; above calculates first layer
-;	movf	carry3, W
-;	addwf	backupl
-;	clrf	W
-;	addwfc	backuph  ; add carry to second layer, carry to 1st layer
-;	movf	carry2, W
-;	addwf	backuph  ; add carry to first layer
-;	movf	backupl, W
-;	subwf	fcounterl
-;	bc	noborrow
-;	movf	backuph, W
-;	subwfb	fcounterh
+multi			    ; multiplication by 0x03, and substract the calculated value from the original value
 	movlw	0x03
 	mulwf	backupl
 	movff	PRODL, backupl
-	movff	PRODH, copy3
+	movff	PRODH, copy3	; lower digits multiplication, with carry
 	movlw	0x03
 	mulwf	backuph
 	movff	PRODL, backuph
 	movf	copy3, W
 	addwf	backuph
-	movf	backupl, W
+	movf	backupl, W		 ; higher digits multiplication, add carry to the higher digits
 	subwf	copy1
-	bc	noborrow
+	bc	noborrow		; substract backupl from cpoy1, branch is no borrow
 	movlw	0xFF
 	subfwb	copy1
 	movf	backuph, W
-	subwfb	copy2
-;	movff	copy2, fcounterh
-;	movff	copy1, fcounterl
-	
+	subwfb	copy2		; if borrow, substract copy1 from 0xFF, then substract backuph and borrow from copy2
 	return
-noborrow
+noborrow				; if no borrow, substract backuph from copy2
 	movf	backuph, W
 	subwf	copy2
-;	movff	copy2, fcounterh
-;	movff	copy1, fcounterl
-;	
 	return
-;fcounter
-;	incf	f_count
-;waittillow
-;	movf	thresh, W
-;	call	ADC_Read
-;	movff	ADRESH, cpr2h
-;	movff	ADRESL, cpr2l
-;	cpfseq	cpr2h
-;	goto	comp1
-;	movf	thresl, W
-;	cpfsgt	cpr2l
-;	return
-;	goto	waittillow
-;
-;compare
-;	call	ADC_Read
-;	movff	ADRESH, cpr2h
-;	movff	ADRESL, cpr2l
-;	movf	thresh, W
-;	cpfseq	cpr2h
-;	goto	comp2
-;	movf	thresl, W
-;	cpfsgt	cpr2l
-;	goto	compare
-;	goto	fcounter
-;comp2
-;	movf	thresh, W
-;	cpfsgt	cpr2h
-;	goto	compare
-;	goto	fcounter
-;	
-;comp1
-;	movf	thresh, W
-;	cpfsgt	cpr2h
-;	goto	compare
-;	goto	waittillow
 
 	
 end
